@@ -1,7 +1,6 @@
 import pygame
 import sys
 from colores import *
-from test import *
 from ahorcado import JuegoAhorcado  # Importa la clase JuegoAhorcado
 from funciones_secundarias import *
 
@@ -37,6 +36,20 @@ ventana_instrucciones = 2
 ventana_actual = ventana_principal
 flag_run = True
 
+def mostrar_menu_principal():
+    ventana.fill(BLANCO)
+    ventana.blit(texto_ahorcado, texto_rect)
+    ventana.blit(boton_play, boton_play_rectangulo)
+    ventana.blit(boton_instrucciones, boton_instrucciones_rectangulo)
+    pygame.display.update()
+
+def mostrar_instrucciones():
+    ventana.fill(BLANCO)
+    ventana.blit(texto_titulo_instrucciones, (400, 120))
+    dibujar_texto(ventana, lineas, fuente_instrucciones, NEGRO, 150, 200)
+    ventana.blit(boton_flecha, boton_flecha_rectangulo)
+    pygame.display.update()
+
 while flag_run:
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
@@ -45,25 +58,20 @@ while flag_run:
             if ventana_actual == ventana_principal:
                 if boton_play_rectangulo.collidepoint(evento.pos):
                     ventana_actual = ventana_juego
-                    juego = JuegoAhorcado(ancho_ventana, alto_ventana)
-                    juego.ejecutar()  # Llama al método jugar del juego
-                    ventana_actual = ventana_principal
                 elif boton_instrucciones_rectangulo.collidepoint(evento.pos):
                     ventana_actual = ventana_instrucciones
             elif ventana_actual == ventana_instrucciones:
                 if boton_flecha_rectangulo.collidepoint(evento.pos):
                     ventana_actual = ventana_principal
-    
-    ventana.fill(BLANCO)
-    
-    if ventana_actual == ventana_principal:
-        ventana.blit(texto_ahorcado, texto_rect)
-        ventana.blit(boton_play, boton_play_rectangulo)
-        ventana.blit(boton_instrucciones, boton_instrucciones_rectangulo)
-    elif ventana_actual == ventana_instrucciones:
-        ventana.blit(texto_titulo_instrucciones, (400, 120))
-        dibujar_texto(ventana, lineas, fuente_instrucciones, NEGRO, 150, 200)
-        ventana.blit(boton_flecha, boton_flecha_rectangulo)
-    
-    pygame.display.update()
 
+    if ventana_actual == ventana_principal:
+        mostrar_menu_principal()
+    elif ventana_actual == ventana_instrucciones:
+        mostrar_instrucciones()
+    elif ventana_actual == ventana_juego:
+        juego = JuegoAhorcado(ancho_ventana, alto_ventana)
+        juego.ejecutar()  # Este método debe manejar el bucle del juego
+        ventana_actual = ventana_principal  # Volver al menú principal después de que el juego termine
+
+pygame.quit()
+sys.exit()

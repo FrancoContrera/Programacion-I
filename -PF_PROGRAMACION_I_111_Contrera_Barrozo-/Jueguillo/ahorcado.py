@@ -20,8 +20,6 @@ class JuegoAhorcado:
         self.cargar_datos()
         self.inicializar_comodines()
 
-        self.puntuacion = cargar_puntuacion("puntuacion.csv")
-
         self.inicializar_matriz = lambda palabra: [["_"] for _ in palabra]
         
         self.reiniciar_juego()
@@ -112,18 +110,21 @@ class JuegoAhorcado:
         letras_no_adivinadas = [letra for letra in palabra if letra not in letras_adivinadas]
         
         if letras_no_adivinadas:
-            letra_a_descubrir = random.choice(letras_no_adivinadas)          
+            letra_a_descubrir = random.choice(letras_no_adivinadas)
+            
+            # Verificar cuántas veces se ha descubierto esta letra
             veces_descubierta = letras_adivinadas.count(letra_a_descubrir)
+            
+            # Añadir la letra a las letras adivinadas
             self.estado_juego["letras_adivinadas"].append(letra_a_descubrir)
-
+            
+            # Añadir mensaje temporal solo si la letra no había sido descubierta antes
             if veces_descubierta == 0:
                 self.estado_juego["mensajes_temporales"].append((f"Descubierta la letra {letra_a_descubrir}", time.time(), VERDE, 2))
-
+               
     def tiempo_extra(self, tiempo_extra=30):
-        if not self.comodines_usados["tiempo_extra"]:
-            self.estado_juego["tiempo_restante"] += tiempo_extra
-            self.estado_juego["mensajes_temporales"].append((f"Tiempo EXTRA: {tiempo_extra} segundos", time.time(), VERDE, 2))
-            self.comodines_usados["tiempo_extra"] = True
+        self.estado_juego["tiempo_restante"] += tiempo_extra
+        self.estado_juego["mensajes_temporales"].append((f"Tiempo EXTRA: {tiempo_extra} segundos", time.time(), VERDE, 2))
 
     def multiplicar_tiempo(self):
         tiempo_transcurrido = time.time() - self.estado_juego["tiempo_inicio"]
@@ -153,8 +154,8 @@ class JuegoAhorcado:
         self.ventana.fill(BLANCO)
         texto_perdio = self.fuente_grande.render("PERDISTE", True, ROJO)
         self.ventana.blit(texto_perdio, (480, 220))
-        self.ventana.blit(self.boton_casa_img, self.boton_casa_rect)
         self.ventana.blit(self.boton_play_img, self.boton_play_rect)
+        self.ventana.blit(self.boton_casa_img, self.boton_casa_rect)
         
     def mostrar_pantalla_pausa(self):
         self.ventana.fill(BLANCO)
@@ -164,33 +165,6 @@ class JuegoAhorcado:
         self.ventana.blit(self.boton_casa_img, self.boton_casa_rect)
         self.ventana.blit(self.boton_play_img, self.boton_play_rect)
     
-    def renderizar_pantalla(self):
-        self.ventana.fill(BLANCO)
-        self.dibujar_ahorcado()
-        self.dibujar_matriz()
-
-        self.mostrar_texto(f"Categoría: {self.estado_juego['categoria']}", (10, 10), NEGRO, self.fuente_pequena)
-        self.mostrar_texto(f"Tiempo: {int(self.estado_juego['tiempo_restante'])}", (10, 40), NEGRO, self.fuente_pequena)
-        self.mostrar_texto(f"Intentos restantes: {self.estado_juego['intentos']}", (10, 70), NEGRO, self.fuente_pequena)
-
-        self.mostrar_texto(f"Puntuación: {self.puntuacion}", (10, 100), NEGRO, self.fuente_pequena)
-
-        self.mostrar_mensajes(self.estado_juego["mensajes"], self.fuente_pequena)
-        self.mostrar_mensajes_temporales(self.estado_juego["mensajes_temporales"], self.fuente_pequena)
-
-        self.ventana.blit(self.boton_pausa_img, self.boton_pausa_rect)
-        self.ventana.blit(self.icono_tiempo_extra_img, self.icono_tiempo_extra_rect)
-        self.ventana.blit(self.icono_descubrir_letra_img, self.icono_descubrir_letra_rect)
-        self.ventana.blit(self.icono_multiplicar_tiempo_img, self.icono_multiplicar_tiempo_rect)
-
-        if self.pausado:
-            self.mostrar_pantalla_pausa()
-
-        if self.perdio:
-            self.mostrar_pantalla_perdio()
-
-        pygame.display.flip()
-        
 
     def dibujar_matriz(self):
         palabra = self.estado_juego["matriz_palabra"]
@@ -214,6 +188,7 @@ class JuegoAhorcado:
         x_centro = self.ancho_ventana // 2 - 150
         y_centro = 350
 
+        # Dibujar la horca (está siempre presente)
         pygame.draw.line(self.ventana, NEGRO, (x_centro - 100, y_centro + 150), (x_centro + 100, y_centro + 150), 5)
         pygame.draw.line(self.ventana, NEGRO, (x_centro, y_centro - 150), (x_centro, y_centro + 150), 5)
         pygame.draw.line(self.ventana, NEGRO, (x_centro, y_centro - 150), (x_centro + 100, y_centro - 150), 5)
@@ -233,6 +208,32 @@ class JuegoAhorcado:
         if intentos < 1:
             pygame.draw.line(self.ventana, NEGRO, (x_centro + 100, y_centro + 50), (x_centro + 125, y_centro + 100), 5)  # pierna 2
 
+    def renderizar_pantalla(self):
+        self.ventana.fill(BLANCO)
+        self.dibujar_ahorcado()
+        self.dibujar_matriz()
+
+        self.mostrar_texto(f"Categoría: {self.estado_juego['categoria']}", (10, 10), NEGRO, self.fuente_pequena)
+        self.mostrar_texto(f"Tiempo: {int(self.estado_juego['tiempo_restante'])}", (10, 40), NEGRO, self.fuente_pequena)
+        self.mostrar_texto(f"Intentos restantes: {self.estado_juego['intentos']}", (10, 70), NEGRO, self.fuente_pequena)
+        self.mostrar_texto(f"Puntuación: {self.puntuacion}", (10, 100), NEGRO, self.fuente_pequena)  # Mostrar la puntuación directamente
+
+        self.mostrar_mensajes(self.estado_juego["mensajes"], self.fuente_pequena)
+        self.mostrar_mensajes_temporales(self.estado_juego["mensajes_temporales"], self.fuente_pequena)
+
+        self.ventana.blit(self.boton_pausa_img, self.boton_pausa_rect)
+        self.ventana.blit(self.icono_tiempo_extra_img, self.icono_tiempo_extra_rect)
+        self.ventana.blit(self.icono_descubrir_letra_img, self.icono_descubrir_letra_rect)
+        self.ventana.blit(self.icono_multiplicar_tiempo_img, self.icono_multiplicar_tiempo_rect)
+
+        if self.pausado:
+            self.mostrar_pantalla_pausa()
+
+        if self.perdio:
+            self.mostrar_pantalla_perdio()
+
+        pygame.display.flip()
+
     def manejar_eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -240,66 +241,60 @@ class JuegoAhorcado:
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 if self.boton_pausa_rect.collidepoint(evento.pos):
                     self.pausado = not self.pausado
-                elif self.icono_tiempo_extra_rect.collidepoint(evento.pos):
-                    if self.icono_tiempo_extra_rect.collidepoint(evento.pos):
-                        if not self.comodines_usados["tiempo_extra"]:
-                            self.tiempo_extra()
-                elif self.icono_descubrir_letra_rect.collidepoint(evento.pos):
-                    if not self.comodines_usados["descubrir_letra"]:
-                        self.descubrir_letra()
-                        self.comodines_usados["descubrir_letra"] = True
-                elif self.icono_multiplicar_tiempo_rect.collidepoint(evento.pos):
-                    if not self.comodines_usados["multiplicar_tiempo"]:
-                        self.multiplicar_tiempo()
-                        self.comodines_usados["multiplicar_tiempo"] = True
-                
                 if self.pausado:
                     if self.boton_casa_rect.collidepoint(evento.pos):
-                        self.ventana 
+                        self.volver_al_menu_principal()
                     elif self.boton_play_rect.collidepoint(evento.pos):
-                        self.pausado = False 
+                        self.pausado = False
                 elif self.perdio:
                     if self.boton_casa_rect.collidepoint(evento.pos):
-                        self.ejecutando = False
+                        self.volver_al_menu_principal()
                     elif self.boton_play_rect.collidepoint(evento.pos):
                         self.reiniciar_juego()
                         self.perdio = False
+                else:
+                    if self.icono_tiempo_extra_rect.collidepoint(evento.pos) and not self.estado_juego["comodin_tiempo_extra_usado"]:
+                        self.tiempo_extra()
+                        self.estado_juego["comodin_tiempo_extra_usado"] = True
+                    elif self.icono_descubrir_letra_rect.collidepoint(evento.pos) and not self.estado_juego["comodin_descubrir_letra_usado"]:
+                        self.descubrir_letra()
+                        self.estado_juego["comodin_descubrir_letra_usado"] = True
+                    elif self.icono_multiplicar_tiempo_rect.collidepoint(evento.pos) and not self.estado_juego["comodin_multiplicar_tiempo_usado"]:
+                        self.multiplicar_tiempo()
+                        self.estado_juego["comodin_multiplicar_tiempo_usado"] = True
             elif evento.type == pygame.KEYDOWN:
                 if not self.pausado and not self.perdio:
                     letra = evento.unicode.lower()
                     if letra.isalpha() and letra not in self.estado_juego["letras_adivinadas"]:
                         self.estado_juego["letras_adivinadas"].append(letra)
-                        if letra in self.estado_juego["palabra_seleccionada"].lower():
-                            self.puntuacion += 10  # Sumar puntos por cada letra correcta
-                            self.estado_juego["mensajes_temporales"].append((f"Descubierta la letra {letra} +10 puntos", time.time(), VERDE, 2))
-                            guardar_puntuacion("puntuacion.csv", self.puntuacion)
-                        else:
+                        if letra not in self.estado_juego["palabra_seleccionada"].lower():
                             self.estado_juego["intentos"] -= 1
-                            self.puntuacion -= 10  # Restar puntos al cometer un error
-                            self.estado_juego["mensajes_temporales"].append((f"Letra incorrecta: {letra} -10 puntos", time.time(), ROJO, 2))
-                            guardar_puntuacion("puntuacion.csv", self.puntuacion)
-
+                            self.puntuacion = max(0, self.puntuacion - 10)  # Restar 10 puntos por error, pero no bajar de 0
+                            self.estado_juego["mensajes_temporales"].append((f"Letra '{letra}' incorrecta, -10 puntos.", time.time(), ROJO, 2))
+                        else:
+                            self.puntuacion += 10  # Sumar 10 puntos por acierto
+                            self.estado_juego["mensajes_temporales"].append((f"Letra '{letra}' correcta, +10 puntos.", time.time(), VERDE, 2))
+                        guardar_puntuacion("puntuacion.csv", self.puntuacion)
+            
     def actualizar_estado_juego(self):
         self.actualizar_matriz()
-        tiempo_transcurrido = time.time() - self.estado_juego["tiempo_inicio"]
-        self.estado_juego["tiempo_restante"] = self.tiempo_limite - tiempo_transcurrido
+        self.estado_juego["tiempo_restante"] = self.tiempo_limite - (time.time() - self.estado_juego["tiempo_inicio"])
 
         if self.estado_juego["intentos"] <= 0 or self.estado_juego["tiempo_restante"] <= 0:
             self.perdio = True
             self.estado_juego["mensajes"].append(f"Perdiste! La palabra era: {self.estado_juego['palabra_seleccionada']}")
-            # Restar puntos al perder
-            self.puntuacion -= 10
-            guardar_puntuacion("puntuacion.csv", self.puntuacion)
 
-        if all(letra[0] != "_" for letra in self.estado_juego["matriz_palabra"]):
+        if all([letra[0] != "_" for letra in self.estado_juego["matriz_palabra"]]):
             tiempo_restante = self.estado_juego["tiempo_restante"]
             if self.estado_juego["multiplicador_tiempo_activo"]:
                 tiempo_restante *= 2
-            # Sumar puntos al completar correctamente la palabra
-            self.puntuacion += 10
-            guardar_puntuacion("puntuacion.csv", self.puntuacion)
+            self.puntuacion += int(tiempo_restante)  # Convertir el tiempo restante en un número entero antes de sumar
+            guardar_puntuacion("puntuacion.csv", self.puntuacion)  # Guardar la puntuación actualizada en el archivo CSV
             self.estado_juego["mensajes"].append(f"Palabra completada! Puntuación: {self.puntuacion}")
-            self.reiniciar_juego(tiempo_restante)
+            self.reiniciar_juego(int(tiempo_restante))  # Pasar el tiempo restante como un número entero
+    
+    def volver_al_menu_principal(self):
+        self.ejecutando = False
 
     def ejecutar(self):
         while self.ejecutando:
@@ -307,5 +302,3 @@ class JuegoAhorcado:
             if not self.pausado and not self.perdio:
                 self.actualizar_estado_juego()
             self.renderizar_pantalla()
-        pygame.quit()
-        sys.exit()
