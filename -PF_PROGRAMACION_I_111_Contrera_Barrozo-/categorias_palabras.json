@@ -1,0 +1,33 @@
+{
+    "Animales": [
+        "mamut",
+        "perro",
+        "elefante",
+        "leon",
+        "rinoceronte",
+        "jirafa"
+    ],
+    "Muebles": [
+        "mesa",
+        "silla",
+        "sofa",
+        "cama",
+        "armario",
+        "escritorio"
+    ],
+    "Adjetivos": [
+        "increible",
+        "facherisimo",
+        "extraordinario",
+        "zarpado",
+        "espectacular"
+    ],
+    "Tecnologia": [
+        "programacion",
+        "computadora",
+        "desarrollador",
+        "video",
+        "joystick",
+        "variable"
+    ]
+}
