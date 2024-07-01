@@ -1,4 +1,5 @@
 import pygame
+import random
 pygame.init()
 
 def cargar_imagen(path: str, ancho: int, alto: int):

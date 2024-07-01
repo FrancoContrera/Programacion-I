@@ -4,7 +4,6 @@ from colores import *
 from test import *
 from ahorcado import JuegoAhorcado  # Importa la clase JuegoAhorcado
 from funciones_secundarias import *
-from pantallas import *
 
 pygame.init()
 
